@@ -1,0 +1,185 @@
+openapi: 3.0.0
+info:
+  title: Google Calendar API Integration
+  description: API spec for managing Google Calendar events, including creating, reading, updating, and deleting events, as well as managing attendees.
+  version: 1.0.0
+servers:
+  - url: https://www.googleapis.com/calendar/v3
+    description: Google Calendar API Server
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          tokenUrl: https://oauth2.googleapis.com/token
+          scopes:
+            https://www.googleapis.com/auth/calendar: Manage your calendars
+            https://www.googleapis.com/auth/calendar.events: Manage calendar events
+paths:
+  /calendars/{calendarId}/events:
+    get:
+      operationId: getCalendarEvents
+      summary: List calendar events
+      description: Lists events on the specified calendar.
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          description: The identifier of the calendar.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of calendar events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+      security:
+        - OAuth2:
+            - https://www.googleapis.com/auth/calendar.readonly
+            - https://www.googleapis.com/auth/calendar.events.readonly
+    post:
+      operationId: createCalendarEvent
+      summary: Create a new calendar event
+      description: Creates a new event on the specified calendar.
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          description: The identifier of the calendar.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: Successfully created event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+      security:
+        - OAuth2:
+            - https://www.googleapis.com/auth/calendar.events
+  /calendars/{calendarId}/events/{eventId}:
+    patch:
+      operationId: updateCalendarEvent
+      summary: Update an existing calendar event
+      description: Updates an existing event on the specified calendar.
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          description: The identifier of the calendar.
+          schema:
+            type: string
+        - name: eventId
+          in: path
+          required: true
+          description: The identifier of the event to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '200':
+          description: Successfully updated event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+      security:
+        - OAuth2:
+            - https://www.googleapis.com/auth/calendar.events
+    delete:
+      operationId: deleteCalendarEvent
+      summary: Delete a calendar event
+      description: Deletes an existing event from the specified calendar.
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          description: The identifier of the calendar.
+          schema:
+            type: string
+        - name: eventId
+          in: path
+          required: true
+          description: The identifier of the event to delete.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successfully deleted event
+      security:
+        - OAuth2:
+            - https://www.googleapis.com/auth/calendar.events
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Event identifier. Required for update, ignored for create.
+        status:
+          type: string
+          description: Event status.
+        summary:
+          type: string
+          description: Summary of the event.
+        description:
+          type: string
+          description: Description of the event.
+        start:
+          $ref: '#/components/schemas/DateTime'
+        end:
+          $ref: '#/components/schemas/DateTime'
+        attendees:
+          type: array
+          description: List of attendees for the event.
+          items:
+            $ref: '#/components/schemas/Attendee'
+    DateTime:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          format: date-time
+          description: The date and time of the event in the format "yyyy-mm-ddTHH:MM:SSZ".
+        timeZone:
+          type: string
+          description: The time zone in which the time is specified.
+    Attendee:
+      type: object
+      properties:
+        email:
+          type: string
+          description: The attendee's email address.
+        displayName:
+          type: string
+          description: The attendee's full name.
+        optional:
+          type: boolean
+          description: Whether the attendee is optional (true) or not (false).
+        responseStatus:
+          type: string
+          description: The attendee's response status. Possible values include "needsAction", "declined", "tentative", "accepted".
+security:
+  - OAuth2: [https://www.googleapis.com/auth/calendar, https://www.googleapis.com/auth/calendar.events]

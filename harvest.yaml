@@ -1,0 +1,129 @@
+openapi: 3.0.0
+info:
+  title: Harvest Project Assignments API
+  description: Returns a list of active project assignments for the currently authenticated user.
+  version: 1.0.0
+servers:
+  - url: https://api.harvestapp.com/v2
+paths:
+  /users/me/project_assignments:
+    get:
+      summary: List active project assignments
+      description: Returns active project assignments for the currently authenticated user.
+      operationId: listActiveProjectAssignments
+      parameters:
+        - name: page
+          in: query
+          description: The page number to use in pagination.
+          schema:
+            type: integer
+          default: 1
+        - name: per_page
+          in: query
+          description: The number of records to return per page.
+          schema:
+            type: integer
+          default: 2000
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project_assignments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProjectAssignment'
+                  per_page:
+                    type: integer
+                  total_pages:
+                    type: integer
+                  total_entries:
+                    type: integer
+                  next_page:
+                    type: null
+                  previous_page:
+                    type: null
+                  page:
+                    type: integer
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      previous:
+                        type: string
+                      last:
+                        type: string
+
+components:
+  schemas:
+    ProjectAssignment:
+      type: object
+      properties:
+        id:
+          type: integer
+        is_project_manager:
+          type: boolean
+        is_active:
+          type: boolean
+        use_default_rates:
+          type: boolean
+        budget:
+          type: null
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        hourly_rate:
+          type: number
+        project:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            code:
+              type: string
+        client:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+        task_assignments:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              billable:
+                type: boolean
+              is_active:
+                type: boolean
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              hourly_rate:
+                type: number
+              budget:
+                type: null
+              task:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
